@@ -1,0 +1,12 @@
+{
+  "id": "stevejobs",
+  "order": 16,
+  "name": "Steve Jobs",
+  "years": "1955 – 2011",
+  "location": "Palo Alto, California",
+  "portrait": "images/SteveJobs.jpg",
+  "voiceId": "",
+  "cardDesc": "Designer. Builder. The man who made technology feel human.",
+  "opening": "Most people don't know what they want until you show it to them. So — what are you actually trying to figure out?",
+  "useSearch": true
+}

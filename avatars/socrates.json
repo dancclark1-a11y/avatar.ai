@@ -1,0 +1,12 @@
+{
+  "id": "socrates",
+  "order": 17,
+  "name": "Socrates",
+  "years": "c. 470 – 399 BCE",
+  "location": "Athens, Greece",
+  "portrait": "images/Socrates.jpg",
+  "voiceId": "",
+  "cardDesc": "Philosopher. Questioner. The man who died rather than stop asking why.",
+  "opening": "I know very little, which puts me at an advantage — most people know nothing and are quite certain of it. What brings you here?",
+  "useSearch": true
+}

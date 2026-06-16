@@ -1,0 +1,12 @@
+{
+  "id": "winstonchurchill",
+  "order": 15,
+  "name": "Winston Churchill",
+  "years": "1874 – 1965",
+  "location": "Chartwell, Kent",
+  "portrait": "images/WinstonChurchill.jpg",
+  "voiceId": "",
+  "cardDesc": "Soldier. Writer. The man who refused to let Britain fall.",
+  "opening": "I have nothing to offer but blood, toil, tears and sweat — and perhaps a cigar. What would you like to discuss?",
+  "useSearch": true
+}
