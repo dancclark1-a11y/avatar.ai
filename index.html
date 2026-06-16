@@ -3,234 +3,704 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Avatar.ai</title>
+<title>avatar.ai</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;700&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:#080808;color:#e0d4b8;font-family:'EB Garamond',Georgia,serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
 
-#entryScreen{display:flex;flex-direction:column;align-items:center;min-height:100vh;width:100%;position:relative;}
-.landing-nav{display:flex;align-items:center;justify-content:space-between;padding:24px 40px;width:100%;}
-.landing-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:5px;color:#f0e6c8;}
-.landing-logo span{color:#c9a84c;}
-.landing-tagline{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:4px;color:#2a2410;}
-.landing-hero{text-align:center;padding:48px 24px 24px;width:100%;}
-.hero-eyebrow{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:6px;color:#3a3018;margin-bottom:20px;}
-.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,13vw,130px);color:#f0e6c8;letter-spacing:2px;line-height:0.88;margin-bottom:24px;}
-.hero-title span{color:#c9a84c;}
-.hero-sub{font-size:15px;font-style:italic;color:#6b5a2a;max-width:440px;margin:0 auto;line-height:1.8;}
-.avatar-strip{display:flex;justify-content:center;gap:10px;padding:36px 24px 28px;flex-wrap:wrap;width:100%;}
-.strip-face{width:64px;height:64px;border-radius:50%;border:1px solid #1e1a0a;overflow:hidden;transition:border-color 0.25s,transform 0.2s;flex-shrink:0;}
-.strip-face:hover{border-color:#c9a84c;transform:translateY(-4px);}
-.strip-face img{width:100%;height:100%;object-fit:cover;object-position:top center;filter:sepia(20%) contrast(1.05) brightness(0.75);}
-.strip-face:hover img{filter:sepia(10%) brightness(0.95);}
-.entry-form{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px;margin-bottom:8px;}
-.entry-form input{width:100%;background:#0e0c06;border:1px solid #2a2410;padding:14px 18px;font-family:'EB Garamond',serif;font-size:15px;color:#e0d4b8;outline:none;transition:border-color 0.2s;}
-.entry-form input::placeholder{color:#3a3018;font-style:italic;}
-.entry-form input:focus{border-color:#c9a84c;}
-.entry-error{color:#8b2020;font-size:13px;font-style:italic;min-height:18px;text-align:center;}
-.entry-btn{width:100%;background:#0e0c06;border:1px solid #c9a84c;padding:15px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:4px;color:#c9a84c;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;margin-top:4px;}
-.entry-btn:hover{background:#1a1508;box-shadow:0 0 24px rgba(201,168,76,0.1);}
-.entry-note{font-size:11px;font-style:italic;color:#2a2410;text-align:center;}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-#mainScreen{display:none;flex-direction:column;min-height:100vh;width:100%;}
-.top-nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid #1a1508;background:#080808;position:sticky;top:0;z-index:10;}
-.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#c9a84c;}
-.nav-brand span{color:#6b5a2a;font-size:16px;letter-spacing:2px;}
-.live-badge{display:flex;align-items:center;gap:6px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:#6b5a2a;}
-.live-dot{width:7px;height:7px;border-radius:50%;background:#8b2020;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+:root {
+  --bg: #0f0f0f;
+  --sidebar: #141414;
+  --surface: #1a1a1a;
+  --surface-2: #1f1f1f;
+  --border: rgba(255,255,255,0.07);
+  --border-2: rgba(255,255,255,0.12);
+  --text: #f0f0f0;
+  --text-2: #888;
+  --text-3: #444;
+  --accent: #c9a84c;
+  --accent-bg: rgba(201,168,76,0.12);
+  --red: #ef4444;
+}
 
-#rosterView{flex:1;padding:48px 32px;max-width:1400px;width:100%;margin:0 auto;}
-.roster-header{margin-bottom:40px;}
-.roster-eyebrow{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:5px;color:#6b5a2a;margin-bottom:8px;}
-.roster-title{font-family:'Bebas Neue',sans-serif;font-size:48px;color:#f0e6c8;letter-spacing:2px;line-height:1;}
-.roster-sub{font-size:15px;font-style:italic;color:#4a3c1a;margin-top:8px;}
-.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:18px;}
-.avatar-card{background:#0e0c06;border:1px solid #1e1a0a;cursor:pointer;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;position:relative;overflow:hidden;}
-.avatar-card:hover{border-color:#c9a84c;transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.5);}
-.avatar-card-img{width:100%;height:220px;object-fit:cover;object-position:top center;display:block;filter:sepia(20%) contrast(1.05) brightness(0.85) grayscale(15%);transition:filter 0.3s;}
-.avatar-card:hover .avatar-card-img{filter:sepia(10%) contrast(1.05) brightness(0.95);}
-.avatar-card-body{padding:12px 14px 16px;border-top:1px solid #1e1a0a;}
-.avatar-card-name{font-family:'Cinzel',serif;font-size:13px;color:#f0e6c8;letter-spacing:1px;margin-bottom:3px;}
-.avatar-card-years{font-size:11px;color:#4a3c1a;font-style:italic;margin-bottom:6px;}
-.avatar-card-desc{font-size:12px;color:#6b5a2a;line-height:1.5;}
-.avatar-card-btn{display:inline-block;margin-top:10px;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:#c9a84c;border-bottom:1px solid #4a3c1a;padding-bottom:2px;}
-.avatar-card:hover .avatar-card-btn{border-color:#c9a84c;}
-.coming-soon{opacity:0.4;cursor:default;pointer-events:none;}
-.coming-soon-badge{position:absolute;top:8px;right:8px;background:#1a1508;border:1px solid #3a3018;font-family:'Bebas Neue',sans-serif;font-size:9px;letter-spacing:2px;color:#6b5a2a;padding:3px 6px;}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
 
-#interviewView{display:none;flex-direction:column;flex:1;max-width:820px;width:100%;margin:0 auto;padding:0 24px;}
-.interview-header{display:flex;flex-direction:column;align-items:center;padding:28px 0 16px;}
-.avatar-media{position:relative;width:160px;height:160px;border-radius:50%;border:2px solid #c9a84c;overflow:hidden;margin-bottom:16px;box-shadow:0 0 0 4px rgba(201,168,76,0.06);flex-shrink:0;}
-.avatar-media img,.avatar-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;}
-.avatar-media img{filter:sepia(15%) contrast(1.05) brightness(0.9);z-index:1;}
-.avatar-media video{z-index:2;display:none;background:#000;}
-.avatar-media.speaking img{opacity:0;}
-.avatar-media.speaking video{display:block;}
-.rendering-ring{position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;border-top-color:#c9a84c;animation:spin 1s linear infinite;display:none;z-index:3;}
-.avatar-media.rendering .rendering-ring{display:block;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.interview-name{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#f0e6c8;text-align:center;}
-.interview-years{font-size:13px;font-style:italic;color:#4a3c1a;text-align:center;margin-top:4px;}
-.interview-status{font-size:13px;font-style:italic;color:#8b2020;text-align:center;min-height:18px;margin-top:6px;}
-.back-btn{display:inline-flex;align-items:center;gap:6px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:3px;color:#4a3c1a;cursor:pointer;padding:16px 0 0;transition:color 0.2s;align-self:flex-start;}
-.back-btn:hover{color:#c9a84c;}
-.divider{width:180px;height:1px;background:linear-gradient(to right,transparent,#2a2410,transparent);margin:14px auto;}
+/* ── Entry Screen ── */
+#entryScreen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
 
-.messages{display:flex;flex-direction:column;gap:16px;max-height:calc(100vh - 500px);min-height:120px;overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:#2a2410 transparent;}
-.messages::-webkit-scrollbar{width:4px;}
-.messages::-webkit-scrollbar-thumb{background:#2a2410;border-radius:4px;}
-.msg{display:flex;flex-direction:column;gap:4px;}
-.msg-label{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:3px;color:#3a3018;}
-.msg.user .msg-label{align-self:flex-end;color:#4a3c1a;}
-.msg-bubble{background:#0e0c06;border:1px solid #1e1a0a;padding:14px 18px;font-size:16px;line-height:1.8;color:#e0d4b8;max-width:88%;}
-.msg.guest .msg-bubble{border-left:2px solid #c9a84c;}
-.msg.user .msg-bubble{align-self:flex-end;font-style:italic;color:#9a8660;border-color:#2a2410;background:#0a0806;}
-.thinking{display:none;align-items:center;gap:8px;padding:8px 0;color:#3a3018;font-style:italic;font-size:14px;}
-.thinking.active{display:flex;}
-.dot{display:inline-block;animation:blink 1.2s infinite;font-size:20px;}
-.dot:nth-child(2){animation-delay:0.3s;}.dot:nth-child(3){animation-delay:0.6s;}
-@keyframes blink{0%,80%,100%{opacity:0;}40%{opacity:1;}}
+.entry-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
 
-.input-area{padding:14px 0 28px;display:flex;flex-direction:column;gap:10px;}
-.controls-row{display:flex;align-items:center;justify-content:flex-start;gap:20px;flex-wrap:wrap;}
-.toggle-wrap{display:flex;align-items:center;gap:8px;}
-.toggle-label{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:3px;color:#4a3c1a;}
-.toggle{position:relative;width:40px;height:22px;}
-.toggle input{opacity:0;width:0;height:0;}
-.toggle-slider{position:absolute;inset:0;background:#1a1508;border:1px solid #2a2410;cursor:pointer;transition:0.2s;}
-.toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:#4a3c1a;transition:0.2s;}
-.toggle input:checked + .toggle-slider{border-color:#c9a84c;}
-.toggle input:checked + .toggle-slider:before{transform:translateX(18px);background:#c9a84c;}
-.toggle input:disabled + .toggle-slider{opacity:0.3;cursor:not-allowed;}
-.input-row{display:flex;gap:8px;align-items:stretch;}
-.text-input{flex:1;background:#0e0c06;border:1px solid #1e1a0a;padding:13px 16px;font-family:'EB Garamond',serif;font-size:16px;color:#e0d4b8;resize:none;outline:none;min-height:50px;line-height:1.5;transition:border-color 0.2s;}
-.text-input::placeholder{color:#2a2410;font-style:italic;}
-.text-input:focus{border-color:#3a3018;}
-.btn-mic{width:50px;background:#0e0c06;border:1px solid #2a2410;color:#c9a84c;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:background 0.2s,border-color 0.2s;flex-shrink:0;}
-.btn-mic:hover{border-color:#c9a84c;background:#1a1508;}
-.btn-mic.recording{background:#1a0606;border-color:#8b2020;animation:micpulse 1.2s infinite;}
-@keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(139,32,32,0.4);}50%{box-shadow:0 0 0 8px rgba(139,32,32,0);}}
-.btn-mic span{font-family:'Bebas Neue',sans-serif;font-size:8px;letter-spacing:1px;color:#4a3c1a;}
-.btn-mic.recording span{color:#8b2020;}
-.btn-send{padding:0 18px;background:#0e0c06;border:1px solid #c9a84c;color:#c9a84c;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:3px;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
-.btn-send:hover{background:#1a1508;}
-.btn-send:disabled{opacity:0.4;cursor:not-allowed;}
-.input-hint{font-size:11px;font-style:italic;color:#2a2410;text-align:center;}
+.logo {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: var(--text);
+}
+.logo span { color: var(--accent); }
+
+.entry-badge {
+  font-size: 11px;
+  color: var(--text-3);
+  letter-spacing: 0.4px;
+}
+
+.entry-hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px 80px;
+  text-align: center;
+}
+
+.entry-title {
+  font-size: clamp(40px, 7vw, 68px);
+  font-weight: 600;
+  letter-spacing: -2.5px;
+  line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.entry-title em {
+  font-style: normal;
+  color: var(--text-2);
+}
+
+.entry-sub {
+  font-size: 15px;
+  color: var(--text-2);
+  max-width: 400px;
+  line-height: 1.75;
+  font-weight: 300;
+  margin-bottom: 44px;
+}
+
+.portrait-strip {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+}
+
+.strip-face {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  transition: border-color 0.2s, transform 0.2s;
+}
+.strip-face:hover { border-color: var(--border-2); transform: translateY(-3px); }
+.strip-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  filter: brightness(0.78);
+}
+
+.entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.entry-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.entry-input::placeholder { color: var(--text-3); }
+.entry-input:focus { border-color: var(--border-2); }
+
+.entry-error {
+  font-size: 12px;
+  color: var(--red);
+  min-height: 16px;
+  text-align: center;
+}
+
+.entry-btn {
+  width: 100%;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.entry-btn:hover { opacity: 0.88; }
+.entry-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.entry-note {
+  margin-top: 14px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* ── Main App ── */
+#mainScreen {
+  display: none;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-top {
+  padding: 20px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface) transparent;
+}
+.sidebar-scroll::-webkit-scrollbar { width: 3px; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 3px; }
+
+.sidebar-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 0 8px 6px;
+}
+
+.figure-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+}
+.figure-item:hover { background: var(--surface); }
+.figure-item.active { background: var(--surface); }
+.figure-item.locked { opacity: 0.35; cursor: default; pointer-events: none; }
+
+.figure-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top center;
+  filter: brightness(0.82);
+  flex-shrink: 0;
+  border: 1.5px solid var(--border);
+  transition: border-color 0.15s, filter 0.15s;
+}
+.figure-item.active .figure-avatar {
+  border-color: var(--accent);
+  filter: brightness(0.95);
+}
+
+.figure-info { flex: 1; min-width: 0; }
+
+.figure-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.12s;
+}
+.figure-item.active .figure-name { color: var(--text); }
+
+.figure-meta {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Main content ── */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  min-width: 0;
+}
+
+#emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-3);
+}
+
+.empty-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 6px;
+  opacity: 0.25;
+}
+
+.empty-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.empty-sub {
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+/* Conversation */
+#conversationView {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.conv-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#avatarMedia {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+#avatarMedia img,
+#avatarMedia video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+}
+#avatarMedia img { filter: brightness(0.88); z-index: 1; }
+#avatarMedia video { z-index: 2; display: none; background: #000; border-radius: 50%; }
+#avatarMedia.speaking img { opacity: 0; }
+#avatarMedia.speaking video { display: block; }
+
+.rendering-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-top-color: var(--accent);
+  animation: spin 0.9s linear infinite;
+  display: none;
+  z-index: 3;
+}
+#avatarMedia.rendering .rendering-ring { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.conv-info { flex: 1; min-width: 0; }
+
+.conv-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-meta {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+.conv-status {
+  font-size: 12px;
+  color: var(--red);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Messages */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface) transparent;
+}
+.messages::-webkit-scrollbar { width: 4px; }
+.messages::-webkit-scrollbar-thumb { background: var(--surface); border-radius: 4px; }
+
+.msg { display: flex; flex-direction: column; gap: 5px; max-width: 680px; }
+.msg.guest { align-self: flex-start; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+
+.msg-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+  padding: 0 4px;
+}
+
+.msg-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px 12px 12px 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--text);
+}
+
+.msg.user .msg-bubble {
+  background: var(--surface-2);
+  border-color: var(--border);
+  border-radius: 12px 4px 12px 12px;
+  color: var(--text-2);
+}
+
+.thinking {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 24px 10px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+.thinking.active { display: flex; }
+
+.dot {
+  display: inline-block;
+  animation: blink 1.2s infinite;
+  font-size: 16px;
+  color: var(--text-3);
+}
+.dot:nth-child(2) { animation-delay: 0.3s; }
+.dot:nth-child(3) { animation-delay: 0.6s; }
+@keyframes blink { 0%,80%,100%{opacity:0;} 40%{opacity:1;} }
+
+/* Input */
+.input-area {
+  padding: 12px 22px 18px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.toggle-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-3);
+}
+
+.toggle {
+  position: relative;
+  width: 34px;
+  height: 18px;
+}
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.toggle-slider::before {
+  content: '';
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  left: 2px;
+  top: 2px;
+  background: var(--text-3);
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+.toggle input:checked + .toggle-slider {
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+.toggle input:checked + .toggle-slider::before {
+  transform: translateX(16px);
+  background: var(--accent);
+}
+.toggle input:disabled + .toggle-slider { opacity: 0.4; cursor: not-allowed; }
+
+.input-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.text-input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  min-height: 44px;
+  max-height: 140px;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+.text-input::placeholder { color: var(--text-3); }
+.text-input:focus { border-color: var(--border-2); }
+
+.btn-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.btn-icon:hover { border-color: var(--border-2); color: var(--text); }
+
+.btn-icon.recording {
+  background: rgba(239,68,68,0.08);
+  border-color: var(--red);
+  color: var(--red);
+  animation: micpulse 1.2s infinite;
+}
+@keyframes micpulse {
+  0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0.25); }
+  50%{ box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+
+.btn-send {
+  height: 44px;
+  padding: 0 18px;
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.btn-send:hover { opacity: 0.88; }
+.btn-send:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.input-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+}
 </style>
 </head>
 <body>
 
+<!-- ── Entry Screen ── -->
 <div id="entryScreen">
-  <div class="landing-nav">
-    <div class="landing-logo">AVATAR<span>.AI</span></div>
-    <div class="landing-tagline">Private Beta</div>
+  <nav class="entry-nav">
+    <div class="logo">avatar<span>.ai</span></div>
+    <div class="entry-badge">Private beta</div>
+  </nav>
+  <div class="entry-hero">
+    <h1 class="entry-title">Conversation<br><em>with history.</em></h1>
+    <p class="entry-sub">Speak directly with history's greatest minds. Every response grounded in primary sources — letters, speeches, scripture, lyrics.</p>
+    <div class="portrait-strip">
+      <div class="strip-face"><img src="images/Washington.jpg" alt="Washington"/></div>
+      <div class="strip-face"><img src="images/JahsehOnfroy.jpg" alt="Jahseh"/></div>
+      <div class="strip-face"><img src="images/SigmundFreud.jpg" alt="Freud"/></div>
+      <div class="strip-face"><img src="images/NiccoloMachiavelli.jpg" alt="Machiavelli"/></div>
+      <div class="strip-face"><img src="images/KingDavid.jpg" alt="King David"/></div>
+      <div class="strip-face"><img src="images/KingSolomon.jpg" alt="King Solomon"/></div>
+      <div class="strip-face"><img src="images/Cleopatra.jpg" alt="Cleopatra"/></div>
+      <div class="strip-face"><img src="images/AbrahamLincoln.jpg" alt="Lincoln"/></div>
+      <div class="strip-face"><img src="images/JaneAusten.jpg" alt="Austen"/></div>
+    </div>
+    <div class="entry-form">
+      <input class="entry-input" type="password" id="codeInput" placeholder="Access code"/>
+      <div class="entry-error" id="entryError"></div>
+      <button class="entry-btn" id="enterBtn">Enter</button>
+    </div>
+    <div class="entry-note">By invitation only &nbsp;·&nbsp; Powered by Claude &amp; ElevenLabs</div>
   </div>
-  <div class="landing-hero">
-    <div class="hero-eyebrow">Powered by Claude &nbsp;·&nbsp; ElevenLabs &nbsp;·&nbsp; Primary Sources</div>
-    <div class="hero-title">INTERVIEW<br><span>HISTORY.</span></div>
-    <div class="hero-sub">Speak directly with history's greatest minds. Every response grounded in primary sources — letters, speeches, scripture, lyrics.</div>
-  </div>
-  <div class="avatar-strip">
-    <div class="strip-face"><img src="images/Washington.jpg" alt="Washington"/></div>
-    <div class="strip-face"><img src="images/jahseh.jpg" alt="Jahseh"/></div>
-    <div class="strip-face"><img src="images/Freud.jpg" alt="Freud"/></div>
-    <div class="strip-face"><img src="images/Machiavelli.jpg" alt="Machiavelli"/></div>
-    <div class="strip-face"><img src="images/King David.jpg" alt="King David"/></div>
-    <div class="strip-face"><img src="images/King Solomon.jpg" alt="King Solomon"/></div>
-    <div class="strip-face"><img src="images/cleopatra.jpg" alt="Cleopatra"/></div>
-  </div>
-  <div class="entry-form">
-    <input type="password" id="codeInput" placeholder="Access code"/>
-    <div class="entry-error" id="entryError"></div>
-    <button class="entry-btn" id="enterBtn">Enter →</button>
-  </div>
-  <div class="entry-note" style="margin-top:16px;">By invitation only</div>
 </div>
 
+<!-- ── Main App ── -->
 <div id="mainScreen">
-  <div class="top-nav">
-    <div class="nav-brand">AVATAR<span>.AI</span></div>
-    <div class="live-badge"><div class="live-dot"></div> On Air</div>
-  </div>
 
-  <div id="rosterView">
-    <div class="roster-header">
-      <div class="roster-eyebrow">Choose Your Guest</div>
-      <div class="roster-title">The Roster</div>
-      <div class="roster-sub">Select a figure to begin the interview.</div>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">avatar<span>.ai</span></div>
     </div>
-    <div class="roster-grid" id="rosterGrid"></div>
-  </div>
+    <div class="sidebar-scroll">
+      <div class="sidebar-label">Figures</div>
+      <div id="figureList"></div>
+    </div>
+  </aside>
 
-  <div id="interviewView">
-    <div class="back-btn" id="backBtn">← Back to Roster</div>
-    <div class="interview-header">
-      <div class="avatar-media" id="avatarMedia">
-        <div class="rendering-ring"></div>
-        <img id="guestPortrait" src="" alt=""/>
-        <video id="guestVideo" playsinline></video>
-      </div>
-      <div class="interview-name" id="guestName"></div>
-      <div class="interview-years" id="guestYears"></div>
-      <div class="interview-status" id="interviewStatus"></div>
+  <!-- Main -->
+  <div class="main-content">
+
+    <!-- Empty state -->
+    <div id="emptyState">
+      <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+      </svg>
+      <div class="empty-title">Select a figure to begin</div>
+      <div class="empty-sub">Choose someone from the sidebar.</div>
     </div>
-    <div class="divider"></div>
-    <div class="messages" id="messages"></div>
-    <div class="thinking" id="thinking">
-      <span style="color:#3a3018;font-size:13px;" id="thinkingText">Searching sources</span>
-      <span class="dot">·</span><span class="dot">·</span><span class="dot">·</span>
-    </div>
-    <div class="input-area">
-      <div class="controls-row">
-        <div class="toggle-wrap">
-          <span class="toggle-label">Voice</span>
-          <label class="toggle"><input type="checkbox" id="voiceToggle" checked><span class="toggle-slider"></span></label>
-          <span class="toggle-label" id="voiceLabel">On</span>
+
+    <!-- Conversation -->
+    <div id="conversationView">
+      <div class="conv-header">
+        <div id="avatarMedia">
+          <div class="rendering-ring"></div>
+          <img id="guestPortrait" src="" alt=""/>
+          <video id="guestVideo" playsinline></video>
         </div>
-        <div class="toggle-wrap">
-          <span class="toggle-label">Talking Head</span>
-          <label class="toggle"><input type="checkbox" id="videoToggle" checked><span class="toggle-slider"></span></label>
-          <span class="toggle-label" id="videoLabel">On</span>
+        <div class="conv-info">
+          <div class="conv-name" id="guestName"></div>
+          <div class="conv-meta" id="guestYears"></div>
         </div>
-        <div class="toggle-wrap">
-          <span class="toggle-label">Text Only</span>
-          <label class="toggle"><input type="checkbox" id="textOnlyToggle"><span class="toggle-slider"></span></label>
-          <span class="toggle-label" id="textOnlyLabel">Off</span>
-        </div>
+        <div class="conv-status" id="interviewStatus"></div>
       </div>
-      <div class="input-row">
-        <textarea class="text-input" id="textInput" placeholder="Type your question..." rows="1"></textarea>
-        <button class="btn-mic" id="micBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
-          </svg>
-          <span id="micLabel">MIC</span>
-        </button>
-        <button class="btn-send" id="sendBtn">Send</button>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="thinking" id="thinking">
+        <span id="thinkingText">Searching sources</span>
+        <span class="dot">·</span><span class="dot">·</span><span class="dot">·</span>
       </div>
-      <div class="input-hint">MIC → speak → STOP &nbsp;·&nbsp; Voice powered by ElevenLabs</div>
+
+      <div class="input-area">
+        <div class="controls-row">
+          <div class="toggle-wrap">
+            <span class="toggle-label">Voice</span>
+            <label class="toggle"><input type="checkbox" id="voiceToggle" checked><span class="toggle-slider"></span></label>
+            <span class="toggle-label" id="voiceLabel">On</span>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Talking head</span>
+            <label class="toggle"><input type="checkbox" id="videoToggle" checked><span class="toggle-slider"></span></label>
+            <span class="toggle-label" id="videoLabel">On</span>
+          </div>
+          <div class="toggle-wrap">
+            <span class="toggle-label">Text only</span>
+            <label class="toggle"><input type="checkbox" id="textOnlyToggle"><span class="toggle-slider"></span></label>
+            <span class="toggle-label" id="textOnlyLabel">Off</span>
+          </div>
+        </div>
+        <div class="input-row">
+          <textarea class="text-input" id="textInput" placeholder="Ask something…" rows="1"></textarea>
+          <button class="btn-icon" id="micBtn" title="Record voice">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/>
+            </svg>
+          </button>
+          <button class="btn-send" id="sendBtn">Send</button>
+        </div>
+        <div class="input-hint">Shift+Enter for new line &nbsp;·&nbsp; Voice powered by ElevenLabs</div>
+      </div>
     </div>
+
   </div>
 </div>
 
 <script>
 let AVATARS = [];
-
-// ── Runtime avatar store (replaces static array after first load) ──
 let AVATARS_LOADED = false;
-
-async function loadAvatars() {
-  if (AVATARS_LOADED) return;
-  const res = await fetch('/avatars', { headers: { 'x-access-code': ACCESS_CODE_VAL } });
-  if (res.ok) {
-    AVATARS = await res.json();
-    AVATARS_LOADED = true;
-  }
-}
-
 let ACCESS_CODE_VAL = '';
 let hasEleven = false;
 let currentAvatar = null;
@@ -240,6 +710,12 @@ let mediaRecorder = null;
 let audioChunks = [];
 
 const $ = id => document.getElementById(id);
+
+async function loadAvatars() {
+  if (AVATARS_LOADED) return;
+  const res = await fetch('/avatars', { headers: { 'x-access-code': ACCESS_CODE_VAL } });
+  if (res.ok) { AVATARS = await res.json(); AVATARS_LOADED = true; }
+}
 
 function enterMain(elevenAvailable) {
   hasEleven = elevenAvailable;
@@ -252,7 +728,7 @@ function enterMain(elevenAvailable) {
   }
   $('entryScreen').style.display = 'none';
   $('mainScreen').style.display = 'flex';
-  loadAvatars().then(() => buildRoster());
+  loadAvatars().then(() => buildFigureList());
 }
 
 $('enterBtn').addEventListener('click', async () => {
@@ -275,47 +751,50 @@ $('enterBtn').addEventListener('click', async () => {
   }
 });
 
-function buildRoster() {
-  const grid = $('rosterGrid');
-  grid.innerHTML = '';
+function buildFigureList() {
+  const list = $('figureList');
+  list.innerHTML = '';
   AVATARS.forEach(a => {
-    const shouldLock = hasEleven && !a.voiceId;
-    const card = document.createElement('div');
-    card.className = 'avatar-card' + (shouldLock ? ' coming-soon' : '');
-    card.innerHTML = `
-      ${shouldLock ? '<div class="coming-soon-badge">Voice Coming Soon</div>' : ''}
-      <img class="avatar-card-img" src="${a.portrait}" alt="${a.name}" onerror="this.style.background='#1a1508';this.style.height='220px'"/>
-      <div class="avatar-card-body">
-        <div class="avatar-card-name">${a.name}</div>
-        <div class="avatar-card-years">${a.years} &nbsp;·&nbsp; ${a.location}</div>
-        <div class="avatar-card-desc">${a.cardDesc}</div>
-        <div class="avatar-card-btn">Begin Interview →</div>
+    const locked = hasEleven && !a.voiceId;
+    const item = document.createElement('div');
+    item.className = 'figure-item' + (locked ? ' locked' : '');
+    item.dataset.id = a.name;
+    item.innerHTML = `
+      <img class="figure-avatar" src="${a.portrait}" alt="${a.name}" onerror="this.style.background='#1a1a1a'"/>
+      <div class="figure-info">
+        <div class="figure-name">${a.name}</div>
+        <div class="figure-meta">${a.years}</div>
       </div>`;
-    if (!shouldLock) card.addEventListener('click', () => startInterview(a));
-    grid.appendChild(card);
+    if (!locked) item.addEventListener('click', () => openConversation(a));
+    list.appendChild(item);
   });
 }
 
-function startInterview(avatar) {
+function openConversation(avatar) {
   currentAvatar = avatar;
   chatHistory = [];
-  $('rosterView').style.display = 'none';
-  $('interviewView').style.display = 'flex';
+
+  document.querySelectorAll('.figure-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === avatar.name);
+  });
+
+  $('emptyState').style.display = 'none';
+  $('conversationView').style.display = 'flex';
+
   $('guestPortrait').src = avatar.portrait;
   $('guestVideo').src = '';
-  $('avatarMedia').classList.remove('speaking','rendering');
+  $('avatarMedia').classList.remove('speaking', 'rendering');
   $('guestName').textContent = avatar.name;
   $('guestYears').textContent = avatar.years + ' · ' + avatar.location;
   $('interviewStatus').textContent = '';
-  $('messages').innerHTML = `<div class="msg guest"><div class="msg-label">${avatar.name}</div><div class="msg-bubble">${avatar.opening}</div></div>`;
-}
 
-$('backBtn').addEventListener('click', () => {
-  $('interviewView').style.display = 'none';
-  $('rosterView').style.display = 'block';
-  currentAvatar = null;
-  chatHistory = [];
-});
+  $('messages').innerHTML = `
+    <div class="msg guest">
+      <div class="msg-label">${avatar.name}</div>
+      <div class="msg-bubble">${avatar.opening}</div>
+    </div>`;
+  $('textInput').focus();
+}
 
 $('voiceToggle').addEventListener('change', () => {
   $('voiceLabel').textContent = $('voiceToggle').checked ? 'On' : 'Off';
@@ -338,7 +817,7 @@ function addMsg(role, text) {
   wrap.className = `msg ${role === 'user' ? 'user' : 'guest'}`;
   const label = document.createElement('div');
   label.className = 'msg-label';
-  label.textContent = role === 'user' ? 'Host' : currentAvatar.name;
+  label.textContent = role === 'user' ? 'You' : currentAvatar.name;
   const bubble = document.createElement('div');
   bubble.className = 'msg-bubble';
   bubble.textContent = text;
@@ -402,7 +881,7 @@ async function askGuest(question) {
 async function speakWithVideo(text) {
   const media = $('avatarMedia');
   media.classList.add('rendering');
-  $('interviewStatus').textContent = 'Rendering talking head…';
+  $('interviewStatus').textContent = 'Rendering…';
   try {
     const res = await fetch(`/elevenlabs/speak/${currentAvatar.voiceId}`, {
       method: 'POST',
@@ -428,7 +907,7 @@ async function speakWithVideo(text) {
     }
   } catch(e) {
     media.classList.remove('rendering');
-    $('interviewStatus').textContent = 'Video unavailable — playing audio only';
+    $('interviewStatus').textContent = 'Video unavailable — audio only';
     await speakAudioOnly(text);
   }
 }
@@ -459,7 +938,7 @@ $('micBtn').addEventListener('click', async () => {
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach(t => t.stop());
         const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        if (ELEVEN_KEY) {
+        if (hasEleven) {
           try {
             const fd = new FormData();
             fd.append('audio', blob, 'q.webm');
@@ -478,13 +957,11 @@ $('micBtn').addEventListener('click', async () => {
       mediaRecorder.start();
       isRecording = true;
       $('micBtn').classList.add('recording');
-      $('micLabel').textContent = 'STOP';
     } catch(e) { $('interviewStatus').textContent = 'Microphone access denied.'; }
   } else {
     mediaRecorder.stop();
     isRecording = false;
     $('micBtn').classList.remove('recording');
-    $('micLabel').textContent = 'MIC';
   }
 });
 
