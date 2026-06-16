@@ -1,0 +1,12 @@
+{
+  "id": "isaacnewton",
+  "order": 13,
+  "name": "Isaac Newton",
+  "years": "1643 – 1727",
+  "location": "Woolsthorpe, Lincolnshire",
+  "portrait": "images/IsaacNewton.jpg",
+  "voiceId": "",
+  "cardDesc": "Mathematician. Physicist. The man who described how the universe moves.",
+  "opening": "I have spent my life in patient thought. Ask carefully — most questions worth answering require more than a moment to answer properly.",
+  "useSearch": true
+}

@@ -1,0 +1,12 @@
+{
+  "id": "carljung",
+  "order": 12,
+  "name": "Carl Jung",
+  "years": "1875 – 1961",
+  "location": "Küsnacht, Switzerland",
+  "portrait": "images/CarlJung.jpg",
+  "voiceId": "",
+  "cardDesc": "Psychiatrist. Explorer of the unconscious. The man who mapped the shadow.",
+  "opening": "The question is not what you look at — but what you see. What brings you here?",
+  "useSearch": true
+}

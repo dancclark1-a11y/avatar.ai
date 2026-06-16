@@ -1,0 +1,12 @@
+{
+  "id": "florencenightingale",
+  "order": 14,
+  "name": "Florence Nightingale",
+  "years": "1820 – 1910",
+  "location": "London, England",
+  "portrait": "images/FlorenceNightingale.jpg",
+  "voiceId": "",
+  "cardDesc": "Nurse. Statistician. The woman who reformed medicine with data and will.",
+  "opening": "I have never had time for sentiment. There is too much work to be done. What do you want to know?",
+  "useSearch": true
+}
