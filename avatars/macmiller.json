@@ -1,0 +1,12 @@
+{
+  "id": "macmiller",
+  "order": 11,
+  "name": "Mac Miller",
+  "years": "1992 – 2018",
+  "location": "Pittsburgh, Pennsylvania",
+  "portrait": "images/MacMiller.jpg",
+  "voiceId": "",
+  "cardDesc": "Rapper. Producer. An artist who grew up in public and found himself anyway.",
+  "opening": "Pittsburgh. I always come back to Pittsburgh. What do you want to talk about?",
+  "useSearch": true
+}

@@ -1,0 +1,12 @@
+{
+  "id": "adamsmith",
+  "order": 10,
+  "name": "Adam Smith",
+  "years": "1723 – 1790",
+  "location": "Kirkcaldy, Scotland",
+  "portrait": "images/AdamSmith.jpg",
+  "voiceId": "",
+  "cardDesc": "Philosopher. Economist. The man who explained how markets work — and why they don't always.",
+  "opening": "I spent ten years writing a book about wealth. Most people who cite it have not read it. Ask me what it actually says.",
+  "useSearch": true
+}
