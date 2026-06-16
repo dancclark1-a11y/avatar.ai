@@ -119,13 +119,10 @@ body{background:#080808;color:#e0d4b8;font-family:'EB Garamond',Georgia,serif;mi
   <div class="brand-title">The <span>Storyteller</span> Broadcast</div>
   <div class="brand-sub">Conversations across history, brought to life.</div>
   <div class="entry-form">
-    <input type="password" id="keyAnthropic" placeholder="Anthropic API key (sk-ant-...)"/>
-    <input type="password" id="keyElevenLabs" placeholder="ElevenLabs API key (optional — for voice)"/>
+    <input type="password" id="codeInput" placeholder="Access code"/>
     <div class="entry-error" id="entryError"></div>
     <button class="entry-btn" id="enterBtn">Enter the Broadcast →</button>
   </div>
-  <div class="entry-skip" id="skipVoice">Skip voice — text only mode →</div>
-  <div class="entry-note">Keys stay in this session only and are never stored.</div>
 </div>
 
 <div id="mainScreen">
@@ -502,8 +499,8 @@ const AVATARS = [
   }
 ];
 
-let ANTHROPIC_KEY = '';
-let ELEVEN_KEY = '';
+let ACCESS_CODE_VAL = '';
+let hasEleven = false;
 let currentAvatar = null;
 let chatHistory = [];
 let isRecording = false;
@@ -512,10 +509,9 @@ let audioChunks = [];
 
 const $ = id => document.getElementById(id);
 
-function enterMain(ak, ek) {
-  ANTHROPIC_KEY = ak;
-  ELEVEN_KEY = ek;
-  if (!ek) {
+function enterMain(elevenAvailable) {
+  hasEleven = elevenAvailable;
+  if (!hasEleven) {
     ['voiceToggle','videoToggle'].forEach(id => { $(id).checked = false; $(id).disabled = true; });
     $('voiceLabel').textContent = 'Off';
     $('videoLabel').textContent = 'Off';
@@ -527,19 +523,24 @@ function enterMain(ak, ek) {
   buildRoster();
 }
 
-$('enterBtn').addEventListener('click', () => {
-  const ak = $('keyAnthropic').value.trim();
-  const ek = $('keyElevenLabs').value.trim();
-  if (!ak) { $('entryError').textContent = 'Anthropic API key is required.'; return; }
-  if (!ak.startsWith('sk-ant-')) { $('entryError').textContent = 'Should start with sk-ant-'; return; }
-  enterMain(ak, ek);
-});
-
-$('skipVoice').addEventListener('click', () => {
-  const ak = $('keyAnthropic').value.trim();
-  if (!ak) { $('entryError').textContent = 'Anthropic API key is still required.'; return; }
-  if (!ak.startsWith('sk-ant-')) { $('entryError').textContent = 'Should start with sk-ant-'; return; }
-  enterMain(ak, '');
+$('enterBtn').addEventListener('click', async () => {
+  const code = $('codeInput').value.trim();
+  if (!code) { $('entryError').textContent = 'Access code required.'; return; }
+  $('enterBtn').disabled = true;
+  try {
+    const res = await fetch('/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code })
+    });
+    const data = await res.json();
+    if (!data.ok) { $('entryError').textContent = 'Invalid access code.'; $('enterBtn').disabled = false; return; }
+    ACCESS_CODE_VAL = code;
+    enterMain(data.hasEleven);
+  } catch(e) {
+    $('entryError').textContent = 'Could not connect to server.';
+    $('enterBtn').disabled = false;
+  }
 });
 
 function buildRoster() {
@@ -630,7 +631,6 @@ async function askGuest(question) {
 
   try {
     const payload = {
-      apiKey: ANTHROPIC_KEY,
       model: 'claude-sonnet-4-5',
       max_tokens: 1500,
       system: currentAvatar.brain + BASE_RULES + conversationNote,
@@ -638,9 +638,9 @@ async function askGuest(question) {
     };
     if (currentAvatar.useSearch) payload.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
 
-    const res = await fetch('http://localhost:3000/anthropic', {
+    const res = await fetch('/anthropic', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'x-access-code': ACCESS_CODE_VAL },
       body: JSON.stringify(payload)
     });
 
@@ -653,7 +653,7 @@ async function askGuest(question) {
     $('thinking').classList.remove('active');
     addMsg('guest', reply);
 
-    const voiceOn = $('voiceToggle').checked && ELEVEN_KEY && currentAvatar.voiceId;
+    const voiceOn = $('voiceToggle').checked && hasEleven && currentAvatar.voiceId;
     if (voiceOn) {
       if ($('videoToggle').checked) await speakWithVideo(reply);
       else await speakAudioOnly(reply);
@@ -672,10 +672,10 @@ async function speakWithVideo(text) {
   media.classList.add('rendering');
   $('interviewStatus').textContent = 'Rendering talking head…';
   try {
-    const res = await fetch(`http://localhost:3000/elevenlabs/speak/${currentAvatar.voiceId}`, {
+    const res = await fetch(`/elevenlabs/speak/${currentAvatar.voiceId}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: ELEVEN_KEY, text, imageFile: currentAvatar.portrait, model_id: 'eleven_flash_v2_5', voice_settings: { stability: 0.72, similarity_boost: 0.85 } })
+      headers: { 'Content-Type': 'application/json', 'x-access-code': ACCESS_CODE_VAL },
+      body: JSON.stringify({ text, imageFile: currentAvatar.portrait, model_id: 'eleven_flash_v2_5', voice_settings: { stability: 0.72, similarity_boost: 0.85 } })
     });
     if (!res.ok) throw new Error('Speak endpoint failed: ' + res.status);
     const contentType = res.headers.get('content-type') || '';
@@ -703,10 +703,10 @@ async function speakWithVideo(text) {
 
 async function speakAudioOnly(text) {
   try {
-    const res = await fetch(`http://localhost:3000/elevenlabs/tts/${currentAvatar.voiceId}`, {
+    const res = await fetch(`/elevenlabs/tts/${currentAvatar.voiceId}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: ELEVEN_KEY, text, model_id: 'eleven_flash_v2_5', voice_settings: { stability: 0.72, similarity_boost: 0.85 } })
+      headers: { 'Content-Type': 'application/json', 'x-access-code': ACCESS_CODE_VAL },
+      body: JSON.stringify({ text, model_id: 'eleven_flash_v2_5', voice_settings: { stability: 0.72, similarity_boost: 0.85 } })
     });
     if (!res.ok) { $('interviewStatus').textContent = 'Voice error'; return; }
     const blob = await res.blob();
@@ -732,9 +732,9 @@ $('micBtn').addEventListener('click', async () => {
             const fd = new FormData();
             fd.append('audio', blob, 'q.webm');
             fd.append('model_id', 'scribe_v1');
-            const r = await fetch('http://localhost:3000/elevenlabs/stt', {
+            const r = await fetch('/elevenlabs/stt', {
               method: 'POST',
-              headers: { 'xi-api-key': ELEVEN_KEY },
+              headers: { 'x-access-code': ACCESS_CODE_VAL },
               body: fd
             });
             const d = await r.json();

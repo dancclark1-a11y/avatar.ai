@@ -3,7 +3,27 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+// Load .env file
+try {
+  fs.readFileSync(path.join(__dirname, '.env'), 'utf8')
+    .split('\n').forEach(line => {
+      const eq = line.indexOf('=');
+      if (eq > 0) process.env[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
+    });
+} catch(e) {}
+
+const PORT = process.env.PORT || 3000;
+const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY || '';
+const ELEVEN_KEY = process.env.ELEVEN_KEY || '';
+const ACCESS_CODE = process.env.ACCESS_CODE || '';
+
+if (!ACCESS_CODE) {
+  console.error('\n❌  ACCESS_CODE is not set in .env — server will reject all requests.\n');
+}
+
+function authorized(req) {
+  return ACCESS_CODE && req.headers['x-access-code'] === ACCESS_CODE;
+}
 
 function readBody(req) {
   return new Promise((resolve) => {
@@ -20,21 +40,35 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
 
+  // ── Access code verification ──────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/verify') {
+    const body = await readBody(req);
+    const { code } = JSON.parse(body.toString());
+    if (ACCESS_CODE && code === ACCESS_CODE) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: true, hasEleven: !!ELEVEN_KEY }));
+    } else {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false }));
+    }
+    return;
+  }
+
   // ── Anthropic proxy ──────────────────────────────────────────────
   if (req.method === 'POST' && req.url === '/anthropic') {
+    if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
     const body = await readBody(req);
     const parsed = JSON.parse(body.toString());
-    const apiKey = parsed.apiKey;
     delete parsed.apiKey;
     const payload = JSON.stringify(parsed);
-    console.log('Anthropic call | key:', apiKey?.slice(0,12) + '...');
+    console.log('Anthropic call | model:', parsed.model);
     const options = {
       hostname: 'api.anthropic.com',
       path: '/v1/messages',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'x-api-key': ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01',
         'Content-Length': Buffer.byteLength(payload)
       }
@@ -56,10 +90,11 @@ const server = http.createServer(async (req, res) => {
 
   // ── ElevenLabs TTS + Lip Sync (combined) ─────────────────────────
   if (req.method === 'POST' && req.url.startsWith('/elevenlabs/speak/')) {
+    if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
     const voiceId = req.url.replace('/elevenlabs/speak/', '');
     const body = await readBody(req);
     const parsed = JSON.parse(body.toString());
-    const { apiKey, text, imageFile, model_id, voice_settings } = parsed;
+    const { text, imageFile, model_id, voice_settings } = parsed;
 
     console.log('TTS + LipSync | voice:', voiceId, '| image:', imageFile);
 
@@ -79,7 +114,7 @@ const server = http.createServer(async (req, res) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'xi-api-key': apiKey,
+            'xi-api-key': ELEVEN_KEY,
             'Content-Length': Buffer.byteLength(ttsPayload)
           }
         };
@@ -146,7 +181,7 @@ const server = http.createServer(async (req, res) => {
           path: '/v1/video/lip-sync',
           method: 'POST',
           headers: {
-            'xi-api-key': apiKey,
+            'xi-api-key': ELEVEN_KEY,
             'Content-Type': `multipart/form-data; boundary=${boundary}`,
             'Content-Length': formBuffer.length
           }
@@ -182,10 +217,10 @@ const server = http.createServer(async (req, res) => {
 
   // ── ElevenLabs TTS only ───────────────────────────────────────────
   if (req.method === 'POST' && req.url.startsWith('/elevenlabs/tts/')) {
+    if (!authorized(req)) { res.writeHead(401); res.end(); return; }
     const voiceId = req.url.replace('/elevenlabs/tts/', '');
     const body = await readBody(req);
     const parsed = JSON.parse(body.toString());
-    const apiKey = parsed.apiKey;
     delete parsed.apiKey;
     const payload = JSON.stringify(parsed);
     const options = {
@@ -194,7 +229,7 @@ const server = http.createServer(async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'xi-api-key': apiKey,
+        'xi-api-key': ELEVEN_KEY,
         'Content-Length': Buffer.byteLength(payload)
       }
     };
@@ -211,14 +246,14 @@ const server = http.createServer(async (req, res) => {
 
   // ── ElevenLabs STT proxy ──────────────────────────────────────────
   if (req.method === 'POST' && req.url === '/elevenlabs/stt') {
+    if (!authorized(req)) { res.writeHead(401); res.end(); return; }
     const body = await readBody(req);
-    const apiKey = req.headers['xi-api-key'];
     const options = {
       hostname: 'api.elevenlabs.io',
       path: '/v1/speech-to-text',
       method: 'POST',
       headers: {
-        'xi-api-key': apiKey,
+        'xi-api-key': ELEVEN_KEY,
         'Content-Type': req.headers['content-type'],
         'Content-Length': body.length
       }
