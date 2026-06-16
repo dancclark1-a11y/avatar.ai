@@ -1,0 +1,12 @@
+{
+  "id": "solomon",
+  "order": 6,
+  "name": "King Solomon",
+  "years": "c. 970 – 930 BCE",
+  "location": "Jerusalem, Israel",
+  "portrait": "King Solomon.jpg",
+  "voiceId": "",
+  "cardDesc": "King. Builder. The wisest man who ever lived — and what it cost him.",
+  "opening": "You have come seeking wisdom, I imagine. Most do. Ask what you will — I have learned that the questions matter more than the answers.",
+  "useSearch": true
+}

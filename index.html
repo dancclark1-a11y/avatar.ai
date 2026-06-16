@@ -523,6 +523,18 @@ const AVATARS = [
   }
 ];
 
+// ── Runtime avatar store (replaces static array after first load) ──
+let AVATARS_LOADED = false;
+
+async function loadAvatars() {
+  if (AVATARS_LOADED) return;
+  const res = await fetch('/avatars', { headers: { 'x-access-code': ACCESS_CODE_VAL } });
+  if (res.ok) {
+    AVATARS = await res.json();
+    AVATARS_LOADED = true;
+  }
+}
+
 let ACCESS_CODE_VAL = '';
 let hasEleven = false;
 let currentAvatar = null;
@@ -544,7 +556,7 @@ function enterMain(elevenAvailable) {
   }
   $('entryScreen').style.display = 'none';
   $('mainScreen').style.display = 'flex';
-  buildRoster();
+  loadAvatars().then(() => buildRoster());
 }
 
 $('enterBtn').addEventListener('click', async () => {
@@ -657,7 +669,7 @@ async function askGuest(question) {
     const payload = {
       model: 'claude-sonnet-4-5',
       max_tokens: 1500,
-      system: currentAvatar.brain + BASE_RULES + conversationNote,
+      system: currentAvatar.brain + conversationNote,
       messages: chatHistory
     };
     if (currentAvatar.useSearch) payload.tools = [{ type: 'web_search_20250305', name: 'web_search' }];

@@ -1,0 +1,12 @@
+{
+  "id": "washington",
+  "order": 1,
+  "name": "George Washington",
+  "years": "1732 – 1799",
+  "location": "Mount Vernon, Virginia",
+  "portrait": "Washington.jpg",
+  "voiceId": "VrTOVaf2mRBEyd29h9Rz",
+  "cardDesc": "Commander. President. Father of a nation.",
+  "opening": "I have been called from retirement once more. Ask what you will — I shall answer as plainly as I am able.",
+  "useSearch": true
+}

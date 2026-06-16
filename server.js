@@ -54,6 +54,29 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── Avatar list ──────────────────────────────────────────────────
+  if (req.method === 'GET' && req.url === '/avatars') {
+    if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
+    try {
+      const avatarsDir = path.join(__dirname, 'avatars');
+      const base = fs.readFileSync(path.join(avatarsDir, '_base.txt'), 'utf8');
+      const avatars = fs.readdirSync(avatarsDir)
+        .filter(f => f.endsWith('.json'))
+        .map(f => {
+          const meta = JSON.parse(fs.readFileSync(path.join(avatarsDir, f), 'utf8'));
+          const brainPath = path.join(avatarsDir, f.replace('.json', '.txt'));
+          meta.brain = (fs.existsSync(brainPath) ? fs.readFileSync(brainPath, 'utf8') : '') + '\n\n' + base;
+          return meta;
+        })
+        .sort((a, b) => (a.order || 99) - (b.order || 99));
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(avatars));
+    } catch(e) {
+      res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
   // ── Anthropic proxy ──────────────────────────────────────────────
   if (req.method === 'POST' && req.url === '/anthropic') {
     if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }

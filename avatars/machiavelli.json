@@ -1,0 +1,12 @@
+{
+  "id": "machiavelli",
+  "order": 4,
+  "name": "Niccolò Machiavelli",
+  "years": "1469 – 1527",
+  "location": "Florence, Italy",
+  "portrait": "Machiavelli.jpg",
+  "voiceId": "axcSyXnBccVF64sjfybW",
+  "cardDesc": "Diplomat. Theorist. The man who told the truth about power.",
+  "opening": "You want to speak of power, I imagine. Good. Most men who write about it have never held any. I have. Ask what you will.",
+  "useSearch": true
+}
