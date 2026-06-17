@@ -33,6 +33,7 @@ export function FigureCard(figure) {
          data-description="${figure.description ?? ''}"
          data-tags="${(figure.tags ?? []).join(',')}"
          data-era="${figure.era ?? ''}"
+         data-keywords="${figure.keywords ?? ''}"
          role="button" tabindex="0">
       <div class="figure-card-portrait-wrap">${img}</div>
       <div class="figure-card-body">
@@ -81,12 +82,23 @@ export function ChatMessage({ role, text, figure }) {
            : `<div class="msg-avatar-placeholder">${figure?.name?.[0] ?? 'F'}</div>`}
        </div>`;
 
+  const saveBtn = isUser ? '' : `
+    <button class="btn-save-quote" title="Save quote"
+            data-quote="${escapeHtml(text)}"
+            data-figure="${escapeHtml(figure?.name ?? '')}"
+            data-figure-id="${figure?.id ?? ''}">
+      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3.5L5 21V5z"/>
+      </svg>
+    </button>`;
+
   return `
     <div class="message ${isUser ? 'user-msg' : ''}" style="animation:fadeUp 0.2s ease forwards">
       ${avatarHtml}
       <div class="msg-body">
         <div class="msg-sender">${isUser ? 'You' : figure?.name ?? 'Figure'}</div>
         <div class="msg-text">${escapeHtml(text)}</div>
+        ${saveBtn}
       </div>
     </div>
   `;

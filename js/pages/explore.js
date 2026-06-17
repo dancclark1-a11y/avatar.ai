@@ -65,15 +65,17 @@ export function initExplorePage({ onSelectFigure }) {
   function renderGrid() {
     if (!grid) return;
     const results = allCards.filter(card => {
-      const name = (card.dataset.name ?? '').toLowerCase();
-      const desc = (card.dataset.description ?? '').toLowerCase();
-      const tags = (card.dataset.tags ?? '').toLowerCase();
-      const era  = (card.dataset.era ?? '').toLowerCase();
+      const name     = (card.dataset.name ?? '').toLowerCase();
+      const desc     = (card.dataset.description ?? '').toLowerCase();
+      const tags     = (card.dataset.tags ?? '').toLowerCase();
+      const era      = (card.dataset.era ?? '').toLowerCase();
+      const keywords = (card.dataset.keywords ?? '').toLowerCase();
       const matchSearch = !searchQuery
         || name.includes(searchQuery)
         || desc.includes(searchQuery)
         || tags.includes(searchQuery)
-        || era.includes(searchQuery);
+        || era.includes(searchQuery)
+        || keywords.includes(searchQuery);
       const matchTag = !activeTag || tags.includes(activeTag.toLowerCase());
       return matchSearch && matchTag;
     });

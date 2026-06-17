@@ -107,6 +107,37 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ── Feedback ─────────────────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/feedback') {
+    if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ ok: false })); return; }
+    const body = await readBody(req);
+    let entry;
+    try { entry = JSON.parse(body.toString()); } catch(e) { res.writeHead(400); res.end(JSON.stringify({ ok: false })); return; }
+    const fbPath = path.join(__dirname, 'feedback.json');
+    let list = [];
+    try { list = JSON.parse(fs.readFileSync(fbPath, 'utf8')); } catch(e) {}
+    list.push({ ...entry, ts: new Date().toISOString() });
+    fs.writeFileSync(fbPath, JSON.stringify(list, null, 2));
+    console.log('Feedback received:', entry.type, '|', (entry.message ?? '').slice(0, 60));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // ── Feedback log (creator view) ──────────────────────────────────
+  if (req.method === 'GET' && req.url === '/feedback-log') {
+    if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
+    try {
+      const fbPath = path.join(__dirname, 'feedback.json');
+      const data = fs.existsSync(fbPath) ? fs.readFileSync(fbPath, 'utf8') : '[]';
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(data);
+    } catch(e) {
+      res.writeHead(500); res.end(JSON.stringify({ error: e.message }));
+    }
+    return;
+  }
+
   // ── Avatar list ──────────────────────────────────────────────────
   if (req.method === 'GET' && req.url === '/avatars') {
     if (!authorized(req)) { res.writeHead(401); res.end(JSON.stringify({ error: 'Unauthorized' })); return; }
