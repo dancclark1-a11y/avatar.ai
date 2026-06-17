@@ -9,7 +9,8 @@ import { ConvoItem } from './components.js';
 import { renderHomePage,    initHomePage    } from './pages/home.js';
 import { renderChatPage,    initChatPage    } from './pages/chat.js';
 import { renderExplorePage, initExplorePage } from './pages/explore.js';
-import { renderLibraryPage, initLibraryPage } from './pages/library.js';
+import { renderLibraryPage, initLibraryPage, trackUsage } from './pages/library.js';
+import { renderFeedbackPage, initFeedbackPage } from './pages/feedback.js';
 
 // ─── State ───────────────────────────────
 let ACCESS_CODE = sessionStorage.getItem('access_code') ?? '';
@@ -163,6 +164,10 @@ function buildSidebar(activePage = '') {
     </nav>
 
     <div class="sidebar-bottom">
+      <a class="nav-item ${activePage === 'feedback' ? 'active' : ''}"
+         href="#/feedback" data-page="feedback">
+        ${iconFeedback()} Feedback
+      </a>
       <a class="nav-item ${activePage === 'settings' ? 'active' : ''}"
          href="#/settings" data-page="settings">
         ${iconSettings()} Settings
@@ -239,6 +244,7 @@ function setupRoutes() {
     buildSidebar('');
     mainEl.innerHTML = mobileHeader(figure?.name ?? 'Chat') + renderChatPage(figureId, FIGURES);
     attachMobileMenu();
+    trackUsage(figureId);
 
     const chatHistory = [];
 
@@ -272,9 +278,17 @@ function setupRoutes() {
   // Library
   router.on('/library', () => {
     buildSidebar('library');
-    mainEl.innerHTML = mobileHeader('Library') + renderLibraryPage();
+    mainEl.innerHTML = mobileHeader('Library') + renderLibraryPage(FIGURES);
     attachMobileMenu();
     initLibraryPage({ onSelectFigure: id => navigate(`/chat/${id}`) });
+  });
+
+  // Feedback
+  router.on('/feedback', () => {
+    buildSidebar('feedback');
+    mainEl.innerHTML = mobileHeader('Feedback') + renderFeedbackPage();
+    attachMobileMenu();
+    initFeedbackPage(ACCESS_CODE);
   });
 
   // Settings
@@ -323,6 +337,7 @@ async function boot() {
 
   await loadFigures();
   setupRoutes();
+  router.navigate(window.location.hash.replace('#', '') || '/');
 }
 
 boot();
@@ -342,6 +357,11 @@ function iconSearch() {
 function iconBook() {
   return `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
     <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+  </svg>`;
+}
+function iconFeedback() {
+  return `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-5l-5 5v-5z"/>
   </svg>`;
 }
 function iconSettings() {
