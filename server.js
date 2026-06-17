@@ -16,6 +16,8 @@ const PORT = process.env.PORT || 3000;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_KEY || '';
 const ELEVEN_KEY = process.env.ELEVEN_KEY || '';
 const ACCESS_CODE = process.env.ACCESS_CODE || '';
+const BEEHIIV_KEY = process.env.BEEHIIV_KEY || '';
+const BEEHIIV_PUB_ID = process.env.BEEHIIV_PUB_ID || '';
 
 if (!ACCESS_CODE) {
   console.error('\n❌  ACCESS_CODE is not set in .env — server will reject all requests.\n');
@@ -42,8 +44,7 @@ const server = http.createServer(async (req, res) => {
 
   // ── Access code verification ──────────────────────────────────────
   if (req.method === 'POST' && req.url === '/verify') {
-    const body = await readBody(req);
-    const { code } = JSON.parse(body.toString());
+    const code = req.headers['x-access-code'];
     if (ACCESS_CODE && code === ACCESS_CODE) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: true, hasEleven: !!ELEVEN_KEY }));
@@ -51,6 +52,58 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ ok: false }));
     }
+    return;
+  }
+
+  // ── Beehiiv subscribe ─────────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/subscribe') {
+    const body = await readBody(req);
+    let email;
+    try { email = JSON.parse(body.toString()).email; } catch(e) {}
+    if (!email) { res.writeHead(400); res.end(JSON.stringify({ ok: false })); return; }
+
+    // Always save locally as backup
+    const wlPath = path.join(__dirname, 'waitlist.json');
+    let list = [];
+    try { list = JSON.parse(fs.readFileSync(wlPath, 'utf8')); } catch(e) {}
+    if (!list.find(e => e.email === email)) list.push({ email, ts: new Date().toISOString() });
+    fs.writeFileSync(wlPath, JSON.stringify(list, null, 2));
+
+    // Forward to Beehiiv if keys are set
+    if (BEEHIIV_KEY && BEEHIIV_PUB_ID) {
+      const payload = JSON.stringify({ email, send_welcome_email: true, utm_source: 'avatar-ai-site' });
+      const opts = {
+        hostname: 'api.beehiiv.com',
+        path: `/v2/publications/${BEEHIIV_PUB_ID}/subscriptions`,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${BEEHIIV_KEY}`, 'Content-Length': Buffer.byteLength(payload) }
+      };
+      await new Promise(resolve => {
+        const r = https.request(opts, bRes => { bRes.resume(); bRes.on('end', resolve); });
+        r.on('error', e => { console.error('Beehiiv error:', e.message); resolve(); });
+        r.write(payload); r.end();
+      });
+    } else {
+      console.log('Beehiiv keys not set — email saved locally only:', email);
+    }
+
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
+    return;
+  }
+
+  // ── Waitlist ─────────────────────────────────────────────────────
+  if (req.method === 'POST' && req.url === '/waitlist') {
+    const body = await readBody(req);
+    let entry;
+    try { entry = JSON.parse(body.toString()); } catch(e) { res.writeHead(400); res.end(JSON.stringify({ ok: false })); return; }
+    const wlPath = path.join(__dirname, 'waitlist.json');
+    let list = [];
+    try { list = JSON.parse(fs.readFileSync(wlPath, 'utf8')); } catch(e) {}
+    list.push({ ...entry, ts: new Date().toISOString() });
+    fs.writeFileSync(wlPath, JSON.stringify(list, null, 2));
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ ok: true }));
     return;
   }
 
